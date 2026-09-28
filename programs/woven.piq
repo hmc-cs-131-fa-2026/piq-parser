@@ -1,0 +1,89 @@
+define hbar(half) {
+    move left half
+    line right half * 2
+    move left half
+}
+
+define vbar(half) {
+    move down half
+    line up half * 2
+    move down half
+}
+
+define lensAcross(n, gap, k) {
+    move down n * gap
+    for i from 0 - n to n {
+        hbar(k * (n * n - i * i))
+        move up gap
+    }
+    move down (n + 1) * gap
+}
+
+define lensUpright(n, gap, k) {
+    move left n * gap
+    for i from 0 - n to n {
+        vbar(k * (n * n - i * i))
+        move right gap
+    }
+    move left (n + 1) * gap
+}
+
+define tunnel(n, big, dx, dy) {
+    for i from 1 to n {
+        square big * (n - i + 1) / n
+        move right dx * i
+        move up dy * i
+    }
+    move left dx * n * (n + 1) / 2
+    move down dy * n * (n + 1) / 2
+}
+
+define corner(x, y, dx, dy) {
+    move right x
+    move up y
+    tunnel(10, 60, dx, dy)
+    move left x
+    move down y
+}
+
+define beadRow(n, gap, k) {
+    move left n * gap
+    for i from 0 - n to n {
+        circle 2 + k * (n * n - i * i)
+        move right gap
+    }
+    move left (n + 1) * gap
+}
+
+define beadColumn(n, gap, k) {
+    move down n * gap
+    for i from 0 - n to n {
+        circle 2 + k * (n * n - i * i)
+        move up gap
+    }
+    move down (n + 1) * gap
+}
+
+rectangle 390 260
+rectangle 380 250
+
+lensAcross(20, 3, 0.2)
+lensUpright(20, 3, 0.2)
+
+drift = 0.28
+corner(150, 90, 0 - drift, 0 - drift)
+corner(0 - 150, 90, drift, 0 - drift)
+corner(0 - 150, 0 - 90, drift, drift)
+corner(150, 0 - 90, 0 - drift, drift)
+
+move up 105
+beadRow(6, 15, 0.15)
+move down 210
+beadRow(6, 15, 0.15)
+move up 105
+
+move right 160
+beadColumn(3, 15, 0.6)
+move left 320
+beadColumn(3, 15, 0.6)
+move right 160

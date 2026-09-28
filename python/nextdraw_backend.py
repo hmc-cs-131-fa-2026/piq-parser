@@ -16,6 +16,11 @@ else:
     print("[nextdraw_backend] Using MOCK NextDraw (preview only)")
 
 
+def using_real_plotter():
+    '''True when the program was run with --doplot (the real NextDraw).'''
+    return _using_real
+
+
 def _out_path():
     '''The path given with --out PATH on the command line, or None.'''
     args = sys.argv[1:]

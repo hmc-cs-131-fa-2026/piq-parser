@@ -8,6 +8,8 @@ import time
 #     image (this is what py2png and piq2png do).
 #   * In the image, pen-down moves are blue and pen-up moves are pink; a
 #     pen_down() immediately followed by pen_up() is drawn as a dot.
+#   * The runtime's safe area (1 inch inside the paper's edges) is a grey
+#     dashed box; any move outside it is red.
 #
 # The mock tracks the pen's position and up/down state itself, so it works
 # without a window.
@@ -54,6 +56,12 @@ class NextDraw:
         self.physical_position = (0.0, 0.0)
         self.segments = []  # (x0, y0, x1, y1, pen_down) for every move, for export()
         self.dots = []      # (x, y) for every pen-down/pen-up without movement
+        # The safe area (left, top, right, bottom), in inches, set by the
+        # runtime; moves outside it, between begin_drawing() and
+        # end_drawing(), are drawn in red.
+        self.safe_area = None
+        self.drawing_segments = (0, None)   # [first, last) segment index of the drawing
+        self.drawing_dots = (0, None)
 
     def interactive(self):
         self.interactive_mode = True
@@ -112,6 +120,25 @@ class NextDraw:
         self.pen.speed(0)
         self.pen.hideturtle()
         self.pen.penup()
+
+    # Hooks for the runtime's safe-area check (the real NextDraw has none).
+    def set_safe_area(self, area):
+        self.safe_area = area
+
+    def begin_drawing(self):
+        self.drawing_segments = (len(self.segments), None)
+        self.drawing_dots = (len(self.dots), None)
+
+    def end_drawing(self):
+        self.drawing_segments = (self.drawing_segments[0], len(self.segments))
+        self.drawing_dots = (self.drawing_dots[0], len(self.dots))
+
+    def _outside(self, x, y):
+        if self.safe_area is None:
+            return False
+        left, top, right, bottom = self.safe_area
+        slack = 1e-6
+        return not (left - slack <= x <= right + slack and top - slack <= y <= bottom + slack)
 
     def disconnect(self):
         if self.screen is not None:
@@ -188,7 +215,8 @@ class NextDraw:
         '''Render recorded segments and dots to PATH (.png or .pdf),
         independent of the live turtle window. Pen-down moves are blue,
         pen-up moves are light pink, matching nextdrawcore's own preview
-        color convention.'''
+        color convention. If the runtime set a safe area, it is drawn as a
+        grey dashed box, and moves outside it are red.'''
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
@@ -204,14 +232,32 @@ class NextDraw:
             fill=False, edgecolor="black", linewidth=1,
         ))
 
-        for x0, y0, x1, y1, pen_down in self.segments:
-            if pen_down:
+        if self.safe_area is not None:
+            left, top, right, bottom = self.safe_area
+            ax.add_patch(plt.Rectangle(
+                (left, top), right - left, bottom - top,
+                fill=False, edgecolor="grey", linewidth=0.8, linestyle="--",
+            ))
+
+        def in_drawing(i, span):
+            first, last = span
+            return first <= i and (last is None or i < last)
+
+        for i, (x0, y0, x1, y1, pen_down) in enumerate(self.segments):
+            # The safe area is a rectangle, so a straight move stays inside
+            # it exactly when both of its ends do.
+            outside = in_drawing(i, self.drawing_segments) and (
+                self._outside(x0, y0) or self._outside(x1, y1))
+            if outside:
+                ax.plot([x0, x1], [y0, y1], color="red", linewidth=1.5 if pen_down else 1.0)
+            elif pen_down:
                 ax.plot([x0, x1], [y0, y1], color="blue", linewidth=1.0)
             else:
                 ax.plot([x0, x1], [y0, y1], color="lightpink", linewidth=0.5)
 
-        for x, y in self.dots:
-            ax.plot([x], [y], marker="o", markersize=2, color="blue")
+        for i, (x, y) in enumerate(self.dots):
+            outside = in_drawing(i, self.drawing_dots) and self._outside(x, y)
+            ax.plot([x], [y], marker="o", markersize=2, color="red" if outside else "blue")
 
         fig.tight_layout(pad=0.2)
         fig.savefig(path, dpi=150)

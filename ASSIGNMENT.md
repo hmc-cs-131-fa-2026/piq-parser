@@ -860,7 +860,7 @@ and the mock plotter's picture.
 > ```
 > **Drawing check:** `programs/example.png` shows three targets, each three circles and a centre dot, growing from
 > left to right, with a line underneath. Blue is drawn; the thin pink lines are pen-up travel (including the trip
-> from the plotter's home corner at the top left).
+> from the plotter's home corner at the top left). The grey dashed box is the safe area: see Step 10.3.
 > ```
 > $ runghc -itest test/Spec.hs --match "Step 10.1"
 > 7 examples, 0 failures
@@ -889,8 +889,10 @@ variable stops at the compiler.
 
 ### Step 10.3: your own program
 Write your own drawing in a new file, `programs/mine.piq`. Use `SYNTAX.md` for reference, and look at
-`programs/garden.piq` for ideas. Then run `bin/piq2png programs/mine.piq`. Keep the drawing within about 200 mm
-left/right and 140 mm up/down of the start.
+`programs/garden.piq` for ideas. Then run `bin/piq2png programs/mine.piq`. Keep the drawing inside the **safe area**,
+the grey dashed box in the preview: at least 1 inch from the paper's edges, which means within 190.5 mm left/right
+and 114.3 mm up/down of the start. Anything outside it is drawn in red with a warning, and the real plotter refuses
+to draw it.
 
 ### The final check
 > **✅ Check your work (everything)**
@@ -935,7 +937,7 @@ Drawing on the real NextDraw plotter happens **in the lab, with your instructor'
 the course procedure:
 
 - **Preview first.** Never send a drawing to the plotter that you haven't previewed (`bin/piq2png`) and checked.
-- Keep drawings within about 200 mm left/right and 140 mm up/down of the start.
+- The plotter refuses any drawing that leaves the safe area (190.5 mm left/right and 114.3 mm up/down of the start).
 - Before plotting, the carriage must be at its **home position** (the top-left corner).
 - On the plotter computer, which has the NextDraw software installed, a generated program runs with `--doplot`:
   ```

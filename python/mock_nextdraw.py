@@ -236,7 +236,7 @@ class NextDraw:
             left, top, right, bottom = self.safe_area
             ax.add_patch(plt.Rectangle(
                 (left, top), right - left, bottom - top,
-                fill=False, edgecolor="grey", linewidth=0.8, linestyle="--",
+                fill=False, edgecolor="grey", linewidth=1.0, linestyle="--",
             ))
 
         def in_drawing(i, span):
@@ -249,15 +249,15 @@ class NextDraw:
             outside = in_drawing(i, self.drawing_segments) and (
                 self._outside(x0, y0) or self._outside(x1, y1))
             if outside:
-                ax.plot([x0, x1], [y0, y1], color="red", linewidth=1.5 if pen_down else 1.0)
+                ax.plot([x0, x1], [y0, y1], color="red", linewidth=2.2 if pen_down else 1.4)
             elif pen_down:
-                ax.plot([x0, x1], [y0, y1], color="blue", linewidth=1.0)
+                ax.plot([x0, x1], [y0, y1], color="blue", linewidth=1.5)
             else:
-                ax.plot([x0, x1], [y0, y1], color="lightpink", linewidth=0.5)
+                ax.plot([x0, x1], [y0, y1], color="lightpink", linewidth=0.7)
 
         for i, (x, y) in enumerate(self.dots):
             outside = in_drawing(i, self.drawing_dots) and self._outside(x, y)
-            ax.plot([x], [y], marker="o", markersize=2, color="red" if outside else "blue")
+            ax.plot([x], [y], marker="o", markersize=3, color="red" if outside else "blue")
 
         fig.tight_layout(pad=0.2)
         fig.savefig(path, dpi=150)

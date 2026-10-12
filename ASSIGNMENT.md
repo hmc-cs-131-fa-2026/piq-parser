@@ -928,7 +928,10 @@ to draw it.
 - [ ] You didn't edit the provided files (including `ParserCombinators.hs`, `ParserBase.hs`, and `test/`).
 
 ## Submitting
-*(Instructions will be provided by your instructor.)*
+Submit on Gradescope under **HW 06: PicPlot Part 2: Parsing**, following the "Turning It In" section of the course
+page: <https://www.cs.hmc.edu/~bang/cs131/assignments/hw06/#turning-it-in>. In short: confirm you finished HW 5
+before opening this repo, paste your `make test` output, upload `PiqParser.hs`, and upload `programs/mine.piq` with
+`programs/mine.png`.
 
 ---
 
